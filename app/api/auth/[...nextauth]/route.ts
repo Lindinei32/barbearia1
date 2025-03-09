@@ -1,3 +1,4 @@
+// C:\barbearia\app\api\auth\[...nextauth]\route.ts
 import NextAuth from "next-auth/next";
 import { authOptions } from "@/app/_lib/auth";
 
