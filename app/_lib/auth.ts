@@ -4,7 +4,7 @@ import { Adapter } from "next-auth/adapters";
 import { db } from "./prisma";
 import GoogleProvider from "next-auth/providers/google";
 
-console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET); // Coloque o console.log aqui
+
 
 export const authOptions: AuthOptions = {
     adapter: PrismaAdapter(db) as Adapter,

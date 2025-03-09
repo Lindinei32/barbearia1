@@ -9,18 +9,32 @@ import { authOptions } from "./_lib/auth"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 
+interface Booking {
+  id: string
+  date: Date
+  service: {
+    id: string
+    name: string
+    price: number
+    barbershop: {
+      id: string
+      name: string
+    }
+  }
+}
+
 const Home = async () => {
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions) as Awaited<ReturnType<typeof getServerSession>> & { user?: { id: string, name: string } }
   const barbershops = await db.barbershop.findMany({
     include: {
       services: true,
     },
   })
 
-  const bookings = session?.user
-    ? await db.booking.findMany({
+  const bookings: Booking[] = session?.user
+    ? (await db.booking.findMany({
         where: {
-          userId: (session?.user as any).id,
+          userId: session.user.id,
         },
         include: {
           service: {
@@ -29,7 +43,13 @@ const Home = async () => {
             },
           },
         },
-      })
+      })).map(booking => ({
+        ...booking,
+        service: {
+          ...booking.service,
+          price: Number(booking.service.price),
+        },
+      }))
     : []
 
   const confirmedBookings = bookings.filter(

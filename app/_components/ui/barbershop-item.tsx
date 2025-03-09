@@ -6,7 +6,7 @@ import { Barbershop } from "@prisma/client";
         barbershop: Barbershop        
     }
 
-    const BarbershopItem = ({barbershop}: BarbershopItemProps) => {
+    const BarbershopItem = ({}: BarbershopItemProps) => {
 
     return (
         <h1></h1>  

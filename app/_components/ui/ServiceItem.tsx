@@ -1,42 +1,43 @@
-"use client"
+"use client";
 
-import { Barbershop, BarbershopService, Booking } from "@prisma/client"
-import Image from "next/image"
+import { Barbershop, BarbershopService, Booking } from "@prisma/client";
+import Image from "next/image";
 
-import { ptBR } from "date-fns/locale"
-import { useEffect, useMemo, useState } from "react"
-import { format, isPast, isToday, set } from "date-fns"
-import { createBooking } from "../../_actions/create-booking"
-import { useSession } from "next-auth/react"
-import { Session } from "next-auth"
+import { ptBR } from "date-fns/locale";
+import { useEffect, useMemo, useState } from "react";
+import { format, isPast, isToday, set } from "date-fns";
+import { createBooking } from "../../_actions/create-booking";
+import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
 
 interface ExtendedSession extends Session {
   user: {
-    id: string
-    name: string
-    email: string
-    image: string
-  }
+    id: string;
+    name: string;
+    email: string;
+    image: string;
+  };
 }
-import { toast } from "sonner"
-import { getbookings } from "../../_actions/get-bookings"
 
-import SignInDialog from "./sign-in-dialog"
-import { Card, CardContent } from "./card"
+import { toast } from "sonner";
+import { getbookings } from "../../_actions/get-bookings";
+
+import SignInDialog from "./sign-in-dialog";
+import { Card, CardContent } from "./card";
 import {
   Sheet,
   SheetContent,
   SheetFooter,
   SheetHeader,
   SheetTitle,
-} from "./sheet"
-import { Button } from "./button"
-import { Calendar } from "./calendar"
-import { Dialog, DialogContent } from "./dialog"
+} from "./sheet";
+import { Button } from "./button";
+import { Calendar } from "./calendar";
+import { Dialog, DialogContent } from "./dialog";
 
 interface ServiceItemProps {
-  service: BarbershopService
-  barbershop: Pick<Barbershop, "name">
+  service: BarbershopService;
+  barbershop: Pick<Barbershop, "name">;
 }
 
 const TIME_LIST = [
@@ -63,140 +64,109 @@ const TIME_LIST = [
   "18:00",
   "18:30",
   "19:00",
-]
-
-interface GetTimeListProps {
-  bookings: Booking[]
-  selectedDay: Date
-}
-
-const getTimeList = ({ bookings, selectedDay }: GetTimeListProps) => {
-  return TIME_LIST.filter((time) => {
-    const [hour, minutes] = time.split(":").map(Number)
-
-    // Verificar se o horário já passou
-    const timeIsOnThePast = isPast(set(selectedDay, { hours: hour, minutes }))
-    if (timeIsOnThePast && isToday(selectedDay)) {
-      return false
-    }
-
-    // Verificar se já existe uma reserva nesse horário
-    const hasBookingOnCurrentTime = bookings.some(
-      (booking) =>
-        booking.date.getHours() === hour &&
-        booking.date.getMinutes() === minutes,
-    )
-    if (hasBookingOnCurrentTime) {
-      return false
-    }
-
-    return true
-  })
-}
+];
 
 const ServiceItem = ({ service, barbershop }: ServiceItemProps) => {
-  const { data: session } = useSession() as { data: ExtendedSession | null }
-  const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined)
-  const [selectedTime, setselectedTime] = useState<string | undefined>(
-    undefined,
-  )
-  const [dayBookings, setDayBookings] = useState<Booking[]>([])
-  const [bookingSheeetIsOpen, setBookingSheeetIsOpen] = useState(false)
-  const [signInDialogIsOpen, setSignInDialogIsOpen] = useState(false)
+  const { data: session } = useSession() as { data: ExtendedSession | null };
+  const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined);
+  const [selectedTime, setselectedTime] = useState<string | undefined>(undefined);
+  const [dayBookings, setDayBookings] = useState<Booking[]>([]);
+  const [bookingSheeetIsOpen, setBookingSheeetIsOpen] = useState(false);
+  const [signInDialogIsOpen, setSignInDialogIsOpen] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
-      if (!selectedDay) return
+      if (!selectedDay) return;
       const bookings = await getbookings({
         date: selectedDay,
         serviceId: service.id,
-      })
-      setDayBookings(JSON.parse(JSON.stringify(bookings)))
-    }
+      });
+      setDayBookings(JSON.parse(JSON.stringify(bookings)));
+    };
 
-    fetch()
-  }, [selectedDay, service.id])
+    fetch();
+  }, [selectedDay, service.id]);
 
   const handleBookingClick = () => {
     if (session?.user) {
-      return setBookingSheeetIsOpen(true)
+      return setBookingSheeetIsOpen(true);
     }
 
-    return setSignInDialogIsOpen(true)
-  }
+    return setSignInDialogIsOpen(true);
+  };
 
   interface GetTimeListProps {
-    bookings: Booking[]
-    selectedDay: Date
+    bookings: Booking[];
+    selectedDay: Date;
   }
 
   const getTimeList = ({ bookings, selectedDay }: GetTimeListProps) => {
     return TIME_LIST.filter((time) => {
-      const hour = Number(time.split(":")[0])
-      const minutes = Number(time.split(":")[1])
+      const hour = Number(time.split(":")[0]);
+      const minutes = Number(time.split(":")[1]);
 
-      const timeIsOnThePast = isPast(set(new Date(), { hours: hour, minutes }))
-      if (timeIsOnThePast && isToday(selectedDay)) return false
+      const timeIsOnThePast = isPast(set(new Date(), { hours: hour, minutes }));
+      if (timeIsOnThePast && isToday(selectedDay)) return false;
 
       const hasBookingOnCurrentTime = bookings.some(
         (booking) =>
-          booking.date.getHours() === hour &&
-          booking.date.getMinutes() === minutes,
-      )
+          booking.date.getHours() === hour && booking.date.getMinutes() === minutes,
+      );
       if (hasBookingOnCurrentTime) {
-        return false
+        return false;
       }
-      return true
-    })
-  }
+      return true;
+    });
+  };
 
   const timeList = useMemo(() => {
-    if (!selectedDay) return []
+    if (!selectedDay) return [];
 
     return getTimeList({
       bookings: dayBookings,
       selectedDay,
-    })
-  }, [dayBookings, selectedDay])
+    });
+  }, [dayBookings, selectedDay, getTimeList]);
 
   const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDay(date)
-  }
+    setSelectedDay(date);
+  };
 
   const handleTimeSelected = (time: string) => {
-    setselectedTime(time)
-  }
+    setselectedTime(time);
+  };
 
   const handleCreateBooking = async () => {
     try {
-      if (!selectedDay || !selectedTime) return
+      if (!selectedDay || !selectedTime) return;
 
-      const hour = selectedTime.split(":")[0]
-      const minute = selectedTime.split(":")[1]
+      const hour = selectedTime.split(":")[0];
+      const minute = selectedTime.split(":")[1];
       const newDate = set(selectedDay, {
         minutes: Number(minute),
         hours: Number(hour),
-      })
+      });
 
       await createBooking({
         userId: session?.user?.id ?? "",
         serviceId: service.id,
         date: newDate,
-      })
-      handleBookingSheeetIsOpen()
-      toast.success("Reserva criada com sucesso!")
+      });
+
+      handleBookingSheeetIsOpen();
+      toast.success("Reserva criada com sucesso!");
     } catch (error) {
-      console.log(error)
-      toast.error("Erro ao criar reserva!")
+      console.log(error);
+      toast.error("Erro ao criar reserva!");
     }
-  }
+  };
 
   const handleBookingSheeetIsOpen = () => {
-    setSelectedDay(undefined)
-    setselectedTime(undefined)
-    setDayBookings([])
-    setBookingSheeetIsOpen(false)
-  }
+    setSelectedDay(undefined);
+    setselectedTime(undefined);
+    setDayBookings([]);
+    setBookingSheeetIsOpen(false);
+  };
 
   return (
     <>
