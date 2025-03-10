@@ -3,7 +3,8 @@
 import NextAuth from "next-auth/next";
 import { AuthOptions } from "next-auth";
 import { Adapter, AdapterSession } from "next-auth/adapters";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+
 import { db } from "../_lib/prisma";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -35,3 +36,5 @@ export const authOptions: AuthOptions = {
 };
 
 export default NextAuth(authOptions);
+
+
