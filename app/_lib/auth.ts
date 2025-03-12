@@ -1,8 +1,8 @@
-import { PrismaAdapter } from "@auth/prisma-adapter"
 import { AuthOptions } from "next-auth"
 import { Adapter } from "next-auth/adapters"
 import { db } from "./prisma"
 import GoogleProvider from "next-auth/providers/google"
+import { PrismaAdapter } from "@next-auth/prisma-adapter"
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(db) as Adapter,

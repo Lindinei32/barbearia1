@@ -1,5 +1,14 @@
 {
   "plugins": ["prettier-plugin-tailwindcss"],
   "tabWidth": 2,
-  "semi": false
+  "semi": false,
+  "importOrder": ["^@/(.*)$", "^@?/(.*)$", "^[./]"],
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      "options": {
+        "parser": "babel-ts"
+      }
+    }
+  ]
 }
